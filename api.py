@@ -1,10 +1,18 @@
 from inspect import getsourcefile
 import os.path
+import gobject
 
 APIS = {}
 
-class WidgetAPI(object):
-    pass
+class API(object):
+
+    def emit_event(self, event, *args):
+
+        def _emit():
+            self.widget.js_context.events.fireEvent(event, *args)
+            return False
+
+        gobject.timeout_add(0, _emit)
 
 
 def register(api):
