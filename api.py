@@ -10,6 +10,7 @@ class API(object):
         pass
 
     def emit_event(self, event, *args):
+        """ Emit the given event. """
 
         def _emit():
             self.widget.js_context.events.fireEvent(event, *args)
@@ -19,6 +20,7 @@ class API(object):
 
 
 def register(api):
+    """ Register an API object. """
 
     def decorator(api):
         path = os.path.abspath(getsourcefile(api))
