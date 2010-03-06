@@ -1,14 +1,15 @@
-from inspect import getsourcefile
 import os.path
 import gobject
+from inspect import getsourcefile
+from collections import defaultdict
 
-APIS = {}
+APIS = defaultdict(dict)
 
 class API(object):
-    """ Base class for custom APIs for Melange Widgets. """
+    def __init__(self, widget):
+        pass
 
     def emit_event(self, event, *args):
-        """ Emit the given event. """
 
         def _emit():
             self.widget.js_context.events.fireEvent(event, *args)
@@ -18,16 +19,13 @@ class API(object):
 
 
 def register(api):
-    """ Register an API object. """
 
     def decorator(api):
         path = os.path.abspath(getsourcefile(api))
-        if not APIS.has_key(path):
-            APIS[path] = {}
         APIS[path][name] = api
         return api
 
-    if type(api) == str:
+    if isinstance(api, str):
         name = api
         return decorator
     else:
