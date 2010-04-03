@@ -1,33 +1,58 @@
+from inspect import getsourcefile
 import os.path
 import gobject
-from inspect import getsourcefile
-from collections import defaultdict
+import threading
 
-APIS = defaultdict(dict)
+APIS = {}
+
+class Thread(threading.Thread):
+
+    def __init__(self, func, args=[], kwargs={}, callback=None):
+        self.func = func
+        self.args = args
+        self.kwargs = kwargs
+        self.callback = callback
+
+        threading.Thread.__init__(self)
+
+
+    def run(self):
+
+        ret = self.func(*self.args, **self.kwargs)
+
+        if self.callback:
+            if type(ret) == tuple:
+                gobject.idle_add(self._call_callback, self.callback, *ret)
+            else:
+                gobject.idle_add(self._call_callback, self.callback, ret)
+
+
+    def foo(self, *args):
+
+        print args
+
+
+    def _call_callback(self, callback, *args):
+
+        callback(*args)
+        return False
+
 
 class API(object):
-    def __init__(self, widget):
+    def __init__(self):
         pass
-
-    def emit_event(self, event, *args):
-        """ Emit the given event. """
-
-        def _emit():
-            self.widget.js_context.events.fireEvent(event, *args)
-            return False
-
-        gobject.timeout_add(0, _emit)
 
 
 def register(api):
-    """ Register an API object. """
 
     def decorator(api):
         path = os.path.abspath(getsourcefile(api))
+        if not APIS.has_key(path):
+            APIS[path] = {}
         APIS[path][name] = api
         return api
 
-    if isinstance(api, str):
+    if type(api) == str:
         name = api
         return decorator
     else:
