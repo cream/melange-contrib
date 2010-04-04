@@ -5,37 +5,32 @@ import threading
 
 APIS = {}
 
-class Thread(threading.Thread):
+class Thread(threading.Thread, gobject.GObject):
 
-    def __init__(self, func, args=[], kwargs={}, callback=None):
+    __gtype_name__ = 'Thread'
+    __gsignals__ = {
+        'finished': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (gobject.TYPE_PYOBJECT,))
+        }
+
+    def __init__(self, func, args=[], kwargs={}):
         self.func = func
         self.args = args
         self.kwargs = kwargs
-        self.callback = callback
 
         threading.Thread.__init__(self)
+        gobject.GObject.__init__(self)
 
 
     def run(self):
 
         ret = self.func(*self.args, **self.kwargs)
 
-        if self.callback:
-            if type(ret) == tuple:
-                gobject.idle_add(self._call_callback, self.callback, *ret)
-            else:
-                gobject.idle_add(self._call_callback, self.callback, ret)
+        #if type(ret) != tuple:
+        #    ret = (ret,)
 
+        print ret
 
-    def foo(self, *args):
-
-        print args
-
-
-    def _call_callback(self, callback, *args):
-
-        callback(*args)
-        return False
+        self.emit('finished', ret)
 
 
 class API(object):
