@@ -25,8 +25,19 @@ import threading
 APIS = {}
 
 class Proxy(object):
+    """
+    A proxy for wrapping functions to run them in threads.
+    This object registers potential callback functions
+    and calls them using Mootools' Events.
+    """
 
     def __init__(self, obj, ctx):
+        """
+        Initialize the Proxy object.
+
+        :param obj: The function to wrap.
+        :param ctx: A JavaScriptCore context.
+        """
 
         self.obj = obj
         self.ctx_ref = weakref.ref(ctx)
@@ -35,7 +46,9 @@ class Proxy(object):
 
 
     def __call__(self, *args):
+        """ Call the wrapped function in another thread. """
 
+        # Get callback function...
         args = list(args)
 
         func_args = inspect.getargspec(self.obj).args
@@ -59,6 +72,12 @@ class Proxy(object):
 
 
     def fire_event(self, event, data):
+        """
+        Fire the given event.
+
+        :param event: Name of the event to fire.
+        :param data: Data to emit with the event.
+        """
 
         ctx = self.ctx_ref()
         ctx.widget.api.fireEvent(self.obj.__name__, data)
@@ -68,6 +87,10 @@ class Proxy(object):
 
 
 class PyToJSInterface(object):
+    """
+    The actual object being registered on the JavaScript-side of the life;)
+    This tries to get exposed methods from the API object and yield it to JS.
+    """
 
     def __init__(self, api):
 
@@ -87,6 +110,7 @@ class PyToJSInterface(object):
 
 
 class Thread(threading.Thread, gobject.GObject):
+    """ An advanced threading class emitting a GObject signal after running. """
 
     __gtype_name__ = 'Thread'
     __gsignals__ = {
@@ -94,6 +118,7 @@ class Thread(threading.Thread, gobject.GObject):
         }
 
     def __init__(self, func, args=[], kwargs={}):
+
         self.func = func
         self.args = args
         self.kwargs = kwargs
@@ -103,23 +128,31 @@ class Thread(threading.Thread, gobject.GObject):
 
 
     def run(self):
+        """ The function getting called on ``Thread.start()``. """
 
         ret = self.func(*self.args, **self.kwargs)
         gobject.timeout_add(0, self._emit, ret)
 
 
     def _emit(self, ret):
-
         self.emit('finished', ret)
 
 
 class API(object):
+    """ The API object to subclass when writing a Python API for JS widgets. """
 
     def __init__(self):
         pass
 
     def emit(self, event, *args):
-        self.ctx.widget.api.fireEvent(event, *args)
+        """
+        Emit an event with the given name and params.
+
+        :param event: The event's name.
+        :param args: A `list` or `tuple` of arguments.
+        """
+
+        self._js_ctx.widget.api.fireEvent(event, *args)
 
 
     def __getattribute__(self, obj_name):
@@ -127,13 +160,14 @@ class API(object):
         obj = object.__getattribute__(self, obj_name)
         try:
             if obj._callable:
-                return Proxy(obj, self.ctx)
+                return Proxy(obj, self._js_ctx)
         except:
             pass
         return obj
 
 
 class FunctionInMainThread(object):
+    """ A wrapper for functions that have to be called in the main thread. """
 
     def __init__(self, func):
 
@@ -156,13 +190,17 @@ class FunctionInMainThread(object):
 
 
 def in_main_thread(func):
+    """ Decorator for functions that have to be called in the main thread. """
+
     def wrapper(*args, **kwargs):
         f = FunctionInMainThread(func)
         return f(*args, **kwargs)
+
     return wrapper
 
 
 def register(api):
+    """ Register the given API object. """
 
     def decorator(api):
         path = os.path.abspath(inspect.getsourcefile(api))
@@ -180,5 +218,7 @@ def register(api):
 
 
 def expose(func):
+    """ Expose the given function to JS. """
+
     func._callable = True
     return func
