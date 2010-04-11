@@ -21,8 +21,9 @@ import os.path
 import weakref
 import gobject
 import threading
+from collections import defaultdict
 
-APIS = {}
+APIS = defaultdict(dict)
 
 class Proxy(object):
     """
@@ -55,20 +56,19 @@ class Proxy(object):
         if (len(func_args) == len(args) and func_args[0] != 'self') or len(func_args) > len(args):
             callback = None
         else:
-            callback = args[-1]
-            del args[-1]
+            callback = args.pop(-1)
 
         # Initialize thread:
-        t = Thread(self.obj, args)
+        call_thread = Thread(self.obj, args)
 
         # Register callback function:
         if callback:
             ctx = self.ctx_ref()
             self.handler = ctx.widget.api.addEvent(self.obj.__name__, callback)
-            t.connect('finished', lambda t, data: self.fire_event(self.obj.__name__, data))
+            call_thread.connect('finished', lambda thread, data: self.fire_event(self.obj.__name__, data))
 
         # Start thread:
-        t.start()
+        call_thread.start()
 
 
     def fire_event(self, event, data):
@@ -97,15 +97,11 @@ class PyToJSInterface(object):
         self.api = api
 
 
-    def __getattribute__(self, obj_name):
+    def __getattr__(self, obj_name):
 
-        api = object.__getattribute__(self, 'api')
-        obj = api.__getattribute__(obj_name)
-        try:
-            if isinstance(obj, Proxy):
-                return obj
-        except:
-            pass
+        obj = getattr(self.api, obj_name)
+        if isinstance(obj, Proxy):
+            return obj
         raise AttributeError
 
 
@@ -117,11 +113,11 @@ class Thread(threading.Thread, gobject.GObject):
         'finished': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (gobject.TYPE_PYOBJECT,))
         }
 
-    def __init__(self, func, args=[], kwargs={}):
+    def __init__(self, func, args=None, kwargs=None):
 
         self.func = func
-        self.args = args
-        self.kwargs = kwargs
+        self.args = args if args is not None else []
+        self.kwargs = kwargs if kwargs is not None else {}
 
         threading.Thread.__init__(self)
         gobject.GObject.__init__(self)
@@ -158,11 +154,8 @@ class API(object):
     def __getattribute__(self, obj_name):
 
         obj = object.__getattribute__(self, obj_name)
-        try:
-            if obj._callable:
-                return Proxy(obj, self._js_ctx)
-        except:
-            pass
+        if obj._callable:
+            return Proxy(obj, self._js_ctx)
         return obj
 
 
@@ -204,12 +197,10 @@ def register(api):
 
     def decorator(api):
         path = os.path.abspath(inspect.getsourcefile(api))
-        if not APIS.has_key(path):
-            APIS[path] = {}
         APIS[path][name] = api
         return api
 
-    if type(api) == str:
+    if isinstance(api, str):
         name = api
         return decorator
     else:
