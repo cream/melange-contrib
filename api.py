@@ -138,7 +138,15 @@ class API(object):
     """ The API object to subclass when writing a Python API for JS widgets. """
 
     def __init__(self):
+        print "JJJJJ"
+        try:
+            print self.get
+        except Exception, e:
+            import traceback
+            traceback.print_exc()
+            print e
         pass
+
 
     def emit(self, event, *args):
         """
@@ -154,8 +162,12 @@ class API(object):
     def __getattribute__(self, obj_name):
 
         obj = object.__getattribute__(self, obj_name)
-        if obj._callable:
-            return Proxy(obj, self._js_ctx)
+
+        try:
+            if obj._callable:
+                return Proxy(obj, self._js_ctx)
+        except:
+            pass
         return obj
 
 
