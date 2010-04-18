@@ -166,8 +166,9 @@ class API(object):
         try:
             if obj._callable:
                 return Proxy(obj, self._js_ctx)
-        except:
-            pass
+        except Exception, e:
+            import traceback
+            traceback.print_exc()
         return obj
 
 
