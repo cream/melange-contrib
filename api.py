@@ -164,7 +164,7 @@ class API(object):
         obj = object.__getattribute__(self, obj_name)
 
         try:
-            if obj._callable:
+            if getattr(obj, '_callable', None):
                 return Proxy(obj, self._js_ctx)
         except Exception, e:
             import traceback
