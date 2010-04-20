@@ -138,13 +138,6 @@ class API(object):
     """ The API object to subclass when writing a Python API for JS widgets. """
 
     def __init__(self):
-        print "JJJJJ"
-        try:
-            print self.get
-        except Exception, e:
-            import traceback
-            traceback.print_exc()
-            print e
         pass
 
 
