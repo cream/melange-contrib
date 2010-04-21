@@ -184,7 +184,11 @@ class FunctionInMainThread(object):
 
 
     def _func_wrapper(self, args, kwargs):
-        self.ret = self.func(*args, **kwargs)
+        try:
+            self.ret = self.func(*args, **kwargs)
+        except Exception, e:
+            import traceback
+            traceback.print_exc()
         self.lock.set()
 
 
