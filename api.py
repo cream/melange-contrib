@@ -43,7 +43,7 @@ class Proxy(object):
         self.obj = obj
         self.ctx_ref = weakref.ref(ctx)
 
-        self.handler = None
+        self.event = None
 
 
     def __call__(self, *args):
@@ -64,7 +64,8 @@ class Proxy(object):
         # Register callback function:
         if callback:
             ctx = self.ctx_ref()
-            self.handler = ctx.widget.api.addEvent(self.obj.__name__, callback)
+            self.event = self.obj.__name__
+            ctx.widget.api.addEvent(self.event, callback)
             call_thread.connect('finished', lambda thread, data: self.fire_event(self.obj.__name__, data))
 
         # Start thread:
@@ -80,10 +81,9 @@ class Proxy(object):
         """
 
         ctx = self.ctx_ref()
-        ctx.widget.api.fireEvent(self.obj.__name__, data)
-        if self.handler:
-            ctx.widget.api.removeEvent(self.obj.__name__, self.handler)
-            self.handler = None
+        if self.event:
+            ctx.widget.api.fireEvent(self.event, data)
+            ctx.widget.api.removeEvents(self.event)
 
 
 class PyToJSInterface(object):
