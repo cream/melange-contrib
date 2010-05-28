@@ -138,7 +138,8 @@ class API(object):
     """ The API object to subclass when writing a Python API for JS widgets. """
 
     def __init__(self):
-        pass
+
+        self._tmp = tempfile.mkdtemp(dir='/tmp/cream/melange')
 
 
     def emit(self, event, *args):
@@ -150,6 +151,10 @@ class API(object):
         """
 
         self._js_ctx.widget.api.fireEvent(event, *args)
+
+
+    def get_tmp(self):
+        return self._tmp
 
 
     def __getattribute__(self, obj_name):
