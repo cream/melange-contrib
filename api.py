@@ -21,6 +21,7 @@ import os.path
 import weakref
 import gobject
 import threading
+import tempfile
 from collections import defaultdict
 
 APIS = defaultdict(dict)
@@ -139,7 +140,7 @@ class API(object):
 
     def __init__(self):
 
-        self._tmp = tempfile.mkdtemp(dir='/tmp/cream/melange')
+        self._tmp = tempfile.mkdtemp()
 
 
     def emit(self, event, *args):
