@@ -4,22 +4,17 @@
   <!-- interface-naming-policy project-wide -->
   <object class="GtkListStore" id="liststore">
     <columns>
-      <!-- column-name id -->
-      <column type="gchararray"/>
-      <!-- column-name path -->
-      <column type="gchararray"/>
-      <!-- column-name title -->
-      <column type="gchararray"/>
-      <!-- column-name description -->
-      <column type="gchararray"/>
       <!-- column-name icon -->
       <column type="GdkPixbuf"/>
       <!-- column-name label -->
+      <column type="gchararray"/>
+      <!-- column-name name -->
       <column type="gchararray"/>
     </columns>
   </object>
   <object class="GtkDialog" id="dialog">
     <property name="border_width">5</property>
+    <property name="title" translatable="yes">Add a widget</property>
     <property name="window_position">center</property>
     <property name="default_width">360</property>
     <property name="default_height">480</property>
@@ -34,34 +29,36 @@
           <object class="GtkScrolledWindow" id="scrolled">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="hscrollbar_policy">never</property>
+            <property name="hscrollbar_policy">automatic</property>
             <property name="vscrollbar_policy">automatic</property>
-            <property name="shadow_type">in</property>
             <child>
-              <object class="GtkTreeView" id="treeview">
+              <object class="GtkViewport" id="viewport">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="model">liststore</property>
-                <property name="headers_visible">False</property>
-                <property name="headers_clickable">False</property>
-                <property name="search_column">0</property>
+                <property name="resize_mode">queue</property>
                 <child>
-                  <object class="GtkTreeViewColumn" id="column">
-                    <property name="title">column</property>
+                  <object class="GtkTreeView" id="treeview">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="model">liststore</property>
+                    <property name="headers_visible">False</property>
+                    <property name="headers_clickable">False</property>
                     <child>
-                      <object class="GtkCellRendererPixbuf" id="cell_icon"/>
-                      <attributes>
-                        <attribute name="pixbuf">4</attribute>
-                      </attributes>
-                    </child>
-                    <child>
-                      <object class="GtkCellRendererText" id="cell_label">
-                        <property name="wrap_mode">word</property>
-                        <property name="wrap_width">300</property>
+                      <object class="GtkTreeViewColumn" id="widget">
+                        <property name="title">column</property>
+                        <child>
+                          <object class="GtkCellRendererPixbuf" id="cellrendererpixbuf2"/>
+                          <attributes>
+                            <attribute name="pixbuf">0</attribute>
+                          </attributes>
+                        </child>
+                        <child>
+                          <object class="GtkCellRendererText" id="cellrenderertext1"/>
+                          <attributes>
+                            <attribute name="markup">1</attribute>
+                            <attribute name="text">1</attribute>
+                          </attributes>
+                        </child>
                       </object>
-                      <attributes>
-                        <attribute name="markup">5</attribute>
-                      </attributes>
                     </child>
                   </object>
                 </child>
@@ -114,7 +111,7 @@
       </object>
     </child>
     <action-widgets>
-      <action-widget response="1">button1</action-widget>
+      <action-widget response="0">button1</action-widget>
       <action-widget response="0">button2</action-widget>
     </action-widgets>
   </object>

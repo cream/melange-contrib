@@ -1,22 +1,40 @@
-import os.path
+#!/usr/bin/env python
+
 import gtk
+from os.path import join, dirname, abspath
 
-from cream.util import get_source_file
 
-class AddWidgetDialog(gtk.Dialog):
+class AddWidgetDialog(object):
 
-    def __new__(cls):
+    def __init__(self):
 
         interface = gtk.Builder()
-        interface.add_from_file(os.path.join(os.path.dirname(get_source_file(cls)), 'interface.glade'))
+        interface.add_from_file(join(dirname(abspath(__file__)), 'add_dialog.glade'))
+        
+        self.dialog = interface.get_object('dialog')
+        self.dialog.connect('delete_event', lambda *args: self.dialog.hide())
+        self.liststore = interface.get_object('liststore')
+        self.treeview = interface.get_object('treeview')
 
-        treeview = interface.get_object('treeview')
-        liststore = interface.get_object('liststore')
-        scrolled = interface.get_object('scrolled')
+    def add(self, widget, path):  
+        if 'icon' in widget:
+            icon_path = widget['icon']
+        else:
+            icon_path = join(path, 'melange.png')
+        icon = gtk.gdk.pixbuf_new_from_file_at_size(icon_path, 35, 35)
+        label = '<b>{0}</b>'.format(widget['name']) + '\n'
+        label += '  <i>{0}</i>'.format(split_string(widget['description']))
+        self.liststore.append((icon, label, widget['name']))
 
-        d = interface.get_object('dialog')
 
-        d.treeview = treeview
-        d.liststore = liststore
+def split_string(description):
+    lst = []
+    chars = 0
+    for word in description.split():
+        if chars > 30:
+            lst.append('\n  ')
+            chars = 0
+        lst.append(word + ' ')
+        chars += len(word)
 
-        return d
+    return ''.join(lst)
