@@ -22,8 +22,8 @@ class AddWidgetDialog(object):
         else:
             icon_path = join(path, 'melange.png')
         icon = gtk.gdk.pixbuf_new_from_file_at_size(icon_path, 35, 35)
-        label = '<b>{0}</b>'.format(widget['name']) + '\n'
-        label += '  <i>{0}</i>'.format(split_string(widget['description']))
+        label = '<b>{0}</b>\n  <i>{1}</i>'.format(widget['name'], \
+                                                  widget['description'])
         self.liststore.append((icon, label, widget['name']))
 
 
