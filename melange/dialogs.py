@@ -3,7 +3,7 @@
 import gtk
 from os.path import join, dirname
 
-from melange.categories import categories
+from categories import categories
 
 class AddWidgetDialog(object):
 
@@ -25,21 +25,30 @@ class AddWidgetDialog(object):
         self.dialog.connect('delete_event', lambda *x: self.dialog.hide())
         self.category_view.connect('cursor-changed',
                                     lambda *x: self.on_category_change()
-                                  )
+        )
 
         # add the categories to the liststore alphabetically
-        for id, category in sorted(categories.iteritems(), key=lambda c: c[1]['name']):
+        categories_ = sorted(categories.iteritems(),
+                             key=lambda c: c[1]['name']
+        )
+        for id, category in categories_:
             self.category_liststore.append((category['name'], id))
 
         # group widgets into categories
         for widget in widgets:
+            if not widget.get('categories'):
+                category = 'org.cream.melange.CategoryMiscellaneous'
+                self._add_to_category(category, widget)
             for category in widget['categories']:
-                if category['id'] in self.widgets:
-                    self.widgets[category['id']].append(widget)
-                else:
-                    self.widgets[category['id']] = [widget]
+                self._add_to_category(category['id'], widget)
 
         self.category_view.set_cursor(0)
+
+    def _add_to_category(self, category, widget):
+        if category in self.widgets:
+            self.widgets[category].append(widget)
+        else:
+            self.widgets[category] = [widget]
 
     def update_info_bar(self):
         """
@@ -91,7 +100,7 @@ class AddWidgetDialog(object):
         return model.get_value(iter, 1)
 
 def split_string(description):
-    """split a long string into more lines"""
+    """split a long string into multiple lines"""
     lst = []
     chars = 0
     for word in description.split():
