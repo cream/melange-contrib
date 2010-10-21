@@ -18,6 +18,8 @@
       <column type="gchararray"/>
       <!-- column-name gchararray1 -->
       <column type="gchararray"/>
+      <!-- column-name icon -->
+      <column type="GdkPixbuf"/>
     </columns>
   </object>
   <object class="GtkDialog" id="dialog">
@@ -27,7 +29,6 @@
     <property name="default_width">450</property>
     <property name="default_height">350</property>
     <property name="type_hint">normal</property>
-    <property name="has_separator">False</property>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox1">
         <property name="visible">True</property>
@@ -61,6 +62,12 @@
                             <property name="resizable">True</property>
                             <property name="title">column</property>
                             <property name="expand">True</property>
+                            <child>
+                              <object class="GtkCellRendererPixbuf" id="cellrendererpixbuf2"/>
+                              <attributes>
+                                <attribute name="pixbuf">2</attribute>
+                              </attributes>
+                            </child>
                             <child>
                               <object class="GtkCellRendererText" id="cellrenderertext1"/>
                               <attributes>

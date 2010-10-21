@@ -24,6 +24,11 @@ categories = {
         'name': 'Games',
         'icon': join(dirname(__file__), 'images/melange.png'),
         'description': 'Gaming for in between? Here you go!'
+    },
+    'org.cream.melange.CategoryMiscellaneous': {
+        'name': 'Miscellaneous',
+        'icon': join(dirname(__file__), 'images/melange.png'),
+        'description': 'Various widgets i can\'t classify '
     }
 
 }

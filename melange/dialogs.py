@@ -32,7 +32,8 @@ class AddWidgetDialog(object):
                              key=lambda c: c[1]['name']
         )
         for id, category in categories_:
-            self.category_liststore.append((category['name'], id))
+            icon = gtk.gdk.pixbuf_new_from_file_at_size(category['icon'], 25, 25)
+            self.category_liststore.append((category['name'], id, icon))
 
         # group widgets into categories
         for widget in widgets:
@@ -64,7 +65,6 @@ class AddWidgetDialog(object):
         description = split_string(category['description'])
         self.category_description.set_text(description)
 
-
     def on_category_change(self):
         """
         Whenever a new category is selected, clear the liststore and add the
@@ -74,6 +74,8 @@ class AddWidgetDialog(object):
         self.widget_liststore.clear()
         self.update_info_bar()
         category = self.selected_category
+        if not category in self.widgets:
+            return
 
         for widget in self.widgets[category]:
             if 'icon' in widget:
