@@ -158,6 +158,10 @@ class API(object):
         return self._tmp
 
 
+    def get_data_path(self):
+        return self._data_path
+
+
     def __getattribute__(self, obj_name):
 
         obj = object.__getattribute__(self, obj_name)
